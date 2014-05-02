@@ -157,7 +157,8 @@ public class CommandLineHelper {
         Double value = MATCH_SIMILARITY_DEFAULT_VALUE;
         final Object parsedOptionValue = commandLine.getOptionValue(MATCH_SIMILARITY_OPTION_NAME);
         if (parsedOptionValue != null) {
-            value = ((Number) parsedOptionValue).doubleValue();
+            String valueString = String.valueOf(parsedOptionValue);
+            value = Double.valueOf(valueString);
         }
 
         return value;
@@ -167,7 +168,8 @@ public class CommandLineHelper {
         Integer value = LIMIT_DEFAULT_VALUE;
         final Object parsedOptionValue = commandLine.getOptionValue(LIMIT_OPTION_NAME);
         if (parsedOptionValue != null) {
-            value = ((Number) parsedOptionValue).intValue();
+            String valueString = String.valueOf(parsedOptionValue);
+            value = Integer.valueOf(valueString);
         }
 
         return value;
@@ -345,7 +347,7 @@ public class CommandLineHelper {
             withType(Boolean.class).
             create());
         posixOptions.addOption(OptionBuilder.withLongOpt(TITLE_OPTION_NAME)
-            .withDescription("Set title into GUI frame.")
+            .withDescription("Set title into GUI frame. Default: " + TITLE_DEFAULT_VALUE)
             .hasArg()
             .withArgName(TITLE_OPTION_NAME)
             .withType(String.class)
@@ -363,25 +365,25 @@ public class CommandLineHelper {
             .withType(String.class)
             .create());
         posixOptions.addOption(OptionBuilder.withLongOpt(RESULT_IMAGE_OPTION_NAME)
-            .withDescription("Path to save result of image comparison.")
+            .withDescription("Path to save result of image comparison. Default location: " + RESULT_IMAGE_DEFAULT_VALUE.getAbsolutePath())
             .hasArg()
             .withArgName(RESULT_IMAGE_OPTION_NAME)
             .withType(String.class)
             .create());
         posixOptions.addOption(OptionBuilder.withLongOpt(RESULT_SOURCE_IMAGE_OPTION_NAME)
-            .withDescription("Path to save result of source image comparison.")
+            .withDescription("Path to save result of source image comparison. Default location: " + RESULT_SOURCE_IMAGE_DEFAULT_VALUE.getAbsolutePath())
             .hasArg()
             .withArgName(RESULT_SOURCE_IMAGE_OPTION_NAME)
             .withType(String.class)
             .create());
         posixOptions.addOption(OptionBuilder.withLongOpt(MATCH_SIMILARITY_OPTION_NAME)
-            .withDescription("Use match similarity to search for.")
+            .withDescription("Use match similarity to search for. Default value: " + MATCH_SIMILARITY_DEFAULT_VALUE)
             .hasArg()
             .withArgName(MATCH_SIMILARITY_OPTION_NAME)
             .withType(Number.class)
             .create());
         posixOptions.addOption(OptionBuilder.withLongOpt(LIMIT_OPTION_NAME)
-            .withDescription("Use limit to limit number of found blocks.")
+            .withDescription("Use limit to limit number of found blocks. Default value: " + LIMIT_DEFAULT_VALUE)
             .hasArg()
             .withArgName(LIMIT_OPTION_NAME)
             .withType(Number.class)
