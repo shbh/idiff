@@ -60,7 +60,7 @@ public class CmdValidator {
             return errors;
         }
 
-        ValidationContext context = new ValidationContext();
+        final ValidationContext context = new ValidationContext();
         context.setCommandLine(commandLine);
         if (!errors.isEmpty()) {
             context.addErrors(errors);
