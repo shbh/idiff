@@ -38,6 +38,18 @@ public class CmdValidator {
             return errors;
         }
 
+        boolean helpArgument = isHelpArgument(commandLine);
+        if (helpArgument) {
+            // nothing to validate
+            return errors;
+        }
+
+        boolean sampleArgument = isSampleArgument(commandLine);
+        if (sampleArgument) {
+            // nothing to validate
+            return errors;
+        }
+
         boolean findModeUsed = commandLine.hasOption(defaults.getFindOptionName());
         boolean diffModeUsed = commandLine.hasOption(defaults.getDiffOptionName());
 
@@ -63,6 +75,18 @@ public class CmdValidator {
     }
 
     private List<ErrorMessage> validateFindMode(CommandLine commandLine) {
+        List<ErrorMessage> errors = validateImages(commandLine);
+
+        return errors;
+    }
+
+    private List<ErrorMessage> validateDiffMode(CommandLine commandLine) {
+        final List<ErrorMessage> errors = validateImages(commandLine);
+
+        return errors;
+    }
+
+    private List<ErrorMessage> validateImages(CommandLine commandLine) {
         final List<ErrorMessage> errors = new ArrayList<ErrorMessage>();
 
         boolean image1Passed = commandLine.hasOption(defaults.getImage1OptionName());
@@ -114,16 +138,18 @@ public class CmdValidator {
             }
         }
 
-        boolean resultImagePassed = commandLine.hasOption(defaults.getResultImageOptionName());
-        if (!resultImagePassed) {
-            errors.add(new ErrorMessage.Builder().message("Result image argument expected").build());
-        }
-
         return errors;
     }
 
-    private List<ErrorMessage> validateDiffMode(CommandLine commandLine) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    private boolean isHelpArgument(CommandLine commandLine) {
+        return commandLine.hasOption(defaults.getHelpOptionName());
+    }
+
+    private boolean isSampleArgument(CommandLine commandLine) {
+        return commandLine.hasOption(defaults.getFindDiffSampleOptionName())
+            || commandLine.hasOption(defaults.getFindDiffRoiSampleOptionName())
+            || commandLine.hasOption(defaults.getFindTemplateInSourceImageSampleOptionName())
+            || commandLine.hasOption(defaults.getFindTemplateInSourceImageRoiSampleOptionName());
     }
 
     public static class Builder {

@@ -7,27 +7,27 @@ import java.io.File;
 
 public class Defaults {
 
-    public static final String HELP_OPTION_NAME = "help";
-    public static final String SHOW_RESULT_OPTION_NAME = "show-result";
-    public static final String TITLE_OPTION_NAME = "title";
-    public static final String IMAGE1_OPTION_NAME = "image1";
-    public static final String IMAGE2_OPTION_NAME = "image2";
-    public static final String RESULT_IMAGE_OPTION_NAME = "result-image";
-    public static final String RESULT_SOURCE_IMAGE_OPTION_NAME = "result-source-image";
-    public static final String MATCH_SIMILARITY_OPTION_NAME = "match-similarity";
-    public static final String LIMIT_OPTION_NAME = "limit";
-    public static final String ROIS_OPTION_NAME = "rois";
+    private static final String HELP_OPTION_NAME = "help";
+    private static final String SHOW_RESULT_OPTION_NAME = "show-result";
+    private static final String TITLE_OPTION_NAME = "title";
+    private static final String IMAGE1_OPTION_NAME = "image1";
+    private static final String IMAGE2_OPTION_NAME = "image2";
+    private static final String RESULT_IMAGE_OPTION_NAME = "result-image";
+    private static final String RESULT_SOURCE_IMAGE_OPTION_NAME = "result-source-image";
+    private static final String MATCH_SIMILARITY_OPTION_NAME = "match-similarity";
+    private static final String LIMIT_OPTION_NAME = "limit";
+    private static final String ROIS_OPTION_NAME = "rois";
 
-    public static final String FIND_OPTION_NAME = "find";
-    public static final String DIFF_OPTION_NAME = "diff";
+    private static final String FIND_OPTION_NAME = "find";
+    private static final String DIFF_OPTION_NAME = "diff";
 
-    public static final String FIND_DIFF_SAMPLE_OPTION_NAME = "find-diff-sample";
-    public static final String FIND_DIFF_ROI_SAMPLE_OPTION_NAME = "find-diff-roi-sample";
-    public static final String FIND_TEMPLATE_IN_SOURCE_IMAGE_SAMPLE_OPTION_NAME = "find-template-in-source-image-sample";
-    public static final String FIND_TEMPLATE_IN_SOURCE_IMAGE_ROI_SAMPLE_OPTION_NAME = "find-template-in-source-image-roi-sample";
+    private static final String FIND_DIFF_SAMPLE_OPTION_NAME = "find-diff-sample";
+    private static final String FIND_DIFF_ROI_SAMPLE_OPTION_NAME = "find-diff-roi-sample";
+    private static final String FIND_TEMPLATE_IN_SOURCE_IMAGE_SAMPLE_OPTION_NAME = "find-template-in-source-image-sample";
+    private static final String FIND_TEMPLATE_IN_SOURCE_IMAGE_ROI_SAMPLE_OPTION_NAME = "find-template-in-source-image-roi-sample";
 
-    public static final String ROI_DELIMITER = "\\s*;\\s*";
-    public static final String ROI_PARAMS_DELIMITER = "\\s*,\\s*";
+    private static final String ROI_DELIMITER = "\\s*;\\s*";
+    private static final String ROI_PARAMS_DELIMITER = "\\s*,\\s*";
 
     private static final String TITLE_VALUE = "";
     private static final File RESULT_IMAGE_VALUE = new File("output/result_image.png");
