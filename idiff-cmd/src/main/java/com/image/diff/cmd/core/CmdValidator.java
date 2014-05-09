@@ -94,7 +94,28 @@ public class CmdValidator {
             errors.add(new ErrorMessage.Builder().message("First image (the source) argument expected").build());
         }
 
+        BufferedImage bufferedImage1 = validateFirstImage(image1Passed, commandLine, errors);
+
+        boolean image2Passed = commandLine.hasOption(defaults.getImage2OptionName());
+        if (!image2Passed) {
+            errors.add(new ErrorMessage.Builder().message("Second image (the template) argument expected").build());
+        }
+
+        BufferedImage bufferedImage2 = validateSecondImage(image2Passed, commandLine, errors);
+
+        if (bufferedImage1 != null && bufferedImage2 != null) {
+            if (bufferedImage1.getHeight() < bufferedImage2.getHeight()
+                || bufferedImage1.getWidth() < bufferedImage2.getWidth()) {
+                errors.add(new ErrorMessage.Builder().message("First image (the source) must be greater than second image (the template)").build());
+            }
+        }
+
+        return errors;
+    }
+
+    private BufferedImage validateFirstImage(boolean image1Passed, CommandLine commandLine, final List<ErrorMessage> errors) {
         BufferedImage bufferedImage1 = null;
+
         if (image1Passed) {
             File image1File = new File(commandLine.getOptionValue(defaults.getImage1OptionName()));
             if (!image1File.exists()) {
@@ -110,12 +131,12 @@ public class CmdValidator {
             }
         }
 
-        boolean image2Passed = commandLine.hasOption(defaults.getImage2OptionName());
-        if (!image2Passed) {
-            errors.add(new ErrorMessage.Builder().message("Second image (the template) argument expected").build());
-        }
+        return bufferedImage1;
+    }
 
+    private BufferedImage validateSecondImage(boolean image2Passed, CommandLine commandLine, final List<ErrorMessage> errors) {
         BufferedImage bufferedImage2 = null;
+
         if (image2Passed) {
             File image2File = new File(commandLine.getOptionValue(defaults.getImage2OptionName()));
             if (!image2File.exists()) {
@@ -131,14 +152,7 @@ public class CmdValidator {
             }
         }
 
-        if (bufferedImage1 != null && bufferedImage2 != null) {
-            if (bufferedImage1.getHeight() < bufferedImage2.getHeight()
-                || bufferedImage1.getWidth() < bufferedImage2.getWidth()) {
-                errors.add(new ErrorMessage.Builder().message("First image (the source) must be greater than second image (the template)").build());
-            }
-        }
-
-        return errors;
+        return bufferedImage2;
     }
 
     private boolean isHelpArgument(CommandLine commandLine) {
