@@ -7,41 +7,18 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CmdProcessor {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    public static final String HELP_OPTION_NAME = "help";
-    public static final String SHOW_RESULT_OPTION_NAME = "show-result";
-    public static final String TITLE_OPTION_NAME = "title";
-    public static final String IMAGE1_OPTION_NAME = "image1";
-    public static final String IMAGE2_OPTION_NAME = "image2";
-    public static final String RESULT_IMAGE_OPTION_NAME = "result-image";
-    public static final String RESULT_SOURCE_IMAGE_OPTION_NAME = "result-source-image";
-    public static final String MATCH_SIMILARITY_OPTION_NAME = "match-similarity";
-    public static final String LIMIT_OPTION_NAME = "limit";
-    public static final String ROIS_OPTION_NAME = "rois";
-
-    public static final String FIND_OPTION_NAME = "find";
-    public static final String DIFF_OPTION_NAME = "diff";
-
-    public static final String FIND_DIFF_SAMPLE_OPTION_NAME = "find-diff-sample";
-    public static final String FIND_DIFF_ROI_SAMPLE_OPTION_NAME = "find-diff-roi-sample";
-    public static final String FIND_TEMPLATE_IN_SOURCE_IMAGE_SAMPLE_OPTION_NAME = "find-template-in-source-image-sample";
-    public static final String FIND_TEMPLATE_IN_SOURCE_IMAGE_ROI_SAMPLE_OPTION_NAME = "find-template-in-source-image-roi-sample";
-
-    public static final String ROI_DELIMITER = "\\s*;\\s*";
-    public static final String ROI_PARAMS_DELIMITER = "\\s*,\\s*";
 
     private final String[] cmdArgs;
+    private CmdCreator cmdCreator;
     private Defaults defaults;
 
     private CmdProcessor(String[] cmdArgs) {
@@ -49,20 +26,18 @@ public class CmdProcessor {
     }
 
     MatchContext createContext(String runArg) {
-        final CommandLineParser cmdLinePosixParser = new PosixParser();
-        final Options posixOptions = buildPosixOptions();
-        CommandLine commandLine;
         try {
-            commandLine = cmdLinePosixParser.parse(posixOptions, cmdArgs);
+            Options options = cmdCreator.getOptions();
+            CommandLine commandLine = cmdCreator.getCommandLine(options, cmdArgs);
             boolean noArgumentsSpecified = cmdArgs == null || cmdArgs.length == 0;
             if (isHelpOptionSpecified(commandLine)) {
-                printHelp(runArg, posixOptions);
+                printHelp(runArg, options);
                 // just exit, that's all we need to do in this case ;-)
                 System.exit(0);
             }
             if (noArgumentsSpecified) {
                 logger.warn("No arguments specified");
-                printHelp(runArg, posixOptions);
+                printHelp(runArg, options);
                 // just exit, that's all we need to do in this case ;-)
                 System.exit(0);
             }
@@ -92,24 +67,24 @@ public class CmdProcessor {
     }
 
     private boolean isHelpOptionSpecified(CommandLine commandLine) {
-        return commandLine.hasOption(HELP_OPTION_NAME);
+        return commandLine.hasOption(defaults.getHelpOptionName());
     }
 
     private boolean isShowResultOptionSpecified(CommandLine commandLine) {
-        return commandLine.hasOption(SHOW_RESULT_OPTION_NAME);
+        return commandLine.hasOption(defaults.getShowResultOptionName());
     }
 
     private boolean isFindOptionSpecified(CommandLine commandLine) {
-        return commandLine.hasOption(FIND_OPTION_NAME);
+        return commandLine.hasOption(defaults.getFindOptionName());
     }
 
     private boolean isDiffOptionSpecified(CommandLine commandLine) {
-        return commandLine.hasOption(DIFF_OPTION_NAME);
+        return commandLine.hasOption(defaults.getDiffOptionName());
     }
 
     private String getTitleOption(CommandLine commandLine) {
         String value = defaults.getTitleValue();
-        final Object parsedOptionValue = commandLine.getOptionValue(TITLE_OPTION_NAME);
+        final Object parsedOptionValue = commandLine.getOptionValue(defaults.getTitleOptionName());
         if (parsedOptionValue != null) {
             value = String.valueOf(parsedOptionValue);
         }
@@ -119,7 +94,7 @@ public class CmdProcessor {
 
     private String getImage1Option(CommandLine commandLine) {
         String value = "";
-        final Object parsedOptionValue = commandLine.getOptionValue(IMAGE1_OPTION_NAME);
+        final Object parsedOptionValue = commandLine.getOptionValue(defaults.getImage1OptionName());
         if (parsedOptionValue != null) {
             value = String.valueOf(parsedOptionValue);
         }
@@ -129,7 +104,7 @@ public class CmdProcessor {
 
     private String getImage2Option(CommandLine commandLine) {
         String value = "";
-        final Object parsedOptionValue = commandLine.getOptionValue(IMAGE2_OPTION_NAME);
+        final Object parsedOptionValue = commandLine.getOptionValue(defaults.getImage2OptionName());
         if (parsedOptionValue != null) {
             value = String.valueOf(parsedOptionValue);
         }
@@ -139,7 +114,7 @@ public class CmdProcessor {
 
     private String getResultImageOption(CommandLine commandLine) {
         String value = defaults.getResultImageValue().getAbsolutePath();
-        final Object parsedOptionValue = commandLine.getOptionValue(RESULT_IMAGE_OPTION_NAME);
+        final Object parsedOptionValue = commandLine.getOptionValue(defaults.getResultImageOptionName());
         if (parsedOptionValue != null) {
             value = String.valueOf(parsedOptionValue);
         }
@@ -149,7 +124,7 @@ public class CmdProcessor {
 
     private String getResultSourceImageOption(CommandLine commandLine) {
         String value = defaults.getResultImageValue().getAbsolutePath();
-        final Object parsedOptionValue = commandLine.getOptionValue(RESULT_SOURCE_IMAGE_OPTION_NAME);
+        final Object parsedOptionValue = commandLine.getOptionValue(defaults.getResultSourceImageOptionName());
         if (parsedOptionValue != null) {
             value = String.valueOf(parsedOptionValue);
         }
@@ -159,7 +134,7 @@ public class CmdProcessor {
 
     private double getMatchSimilarityOption(CommandLine commandLine) {
         Double value = defaults.getMatchSimilarityValue();
-        final Object parsedOptionValue = commandLine.getOptionValue(MATCH_SIMILARITY_OPTION_NAME);
+        final Object parsedOptionValue = commandLine.getOptionValue(defaults.getMatchSimilarityOptionName());
         if (parsedOptionValue != null) {
             String valueString = String.valueOf(parsedOptionValue);
             value = Double.valueOf(valueString);
@@ -170,7 +145,7 @@ public class CmdProcessor {
 
     private int getLimitOption(CommandLine commandLine) {
         Integer value = defaults.getLimitValue();
-        final Object parsedOptionValue = commandLine.getOptionValue(LIMIT_OPTION_NAME);
+        final Object parsedOptionValue = commandLine.getOptionValue(defaults.getLimitOptionName());
         if (parsedOptionValue != null) {
             String valueString = String.valueOf(parsedOptionValue);
             value = Integer.valueOf(valueString);
@@ -181,16 +156,16 @@ public class CmdProcessor {
 
     private List<Roi> getRoisOption(CommandLine commandLine) {
         List<Roi> values = new ArrayList<Roi>();
-        final Object parsedOptionValue = commandLine.getOptionValue(ROIS_OPTION_NAME);
+        final Object parsedOptionValue = commandLine.getOptionValue(defaults.getRoisOptionName());
         if (parsedOptionValue != null) {
             String valuesString = String.valueOf(parsedOptionValue);
-            String[] roiStrings = valuesString.split(ROI_DELIMITER);
+            String[] roiStrings = valuesString.split(defaults.getRoiDelimiter());
             if (roiStrings.length < 1) {
                 return values;
             }
 
             for (String roiString : roiStrings) {
-                String[] roiParams = roiString.split(ROI_PARAMS_DELIMITER);
+                String[] roiParams = roiString.split(defaults.getRoiParamsDelimiter());
                 if (roiParams.length != 4) {
                     logger.warn("Wrong ROI params in: " + roiString + ". Expects 4 params. Actual: " + roiParams.length);
                     continue;
@@ -221,19 +196,19 @@ public class CmdProcessor {
     }
 
     private boolean isFindDiffSampleOptionSpecified(CommandLine commandLine) {
-        return commandLine.hasOption(FIND_DIFF_SAMPLE_OPTION_NAME);
+        return commandLine.hasOption(defaults.getFindDiffSampleOptionName());
     }
 
     private boolean isFindDiffRoiSampleOptionSpecified(CommandLine commandLine) {
-        return commandLine.hasOption(FIND_DIFF_ROI_SAMPLE_OPTION_NAME);
+        return commandLine.hasOption(defaults.getFindDiffRoiSampleOptionName());
     }
 
     private boolean isFindTemplateInSourceImageSampleOptionSpecified(CommandLine commandLine) {
-        return commandLine.hasOption(FIND_TEMPLATE_IN_SOURCE_IMAGE_SAMPLE_OPTION_NAME);
+        return commandLine.hasOption(defaults.getFindTemplateInSourceImageSampleOptionName());
     }
 
     private boolean isFindTemplateInSourceImageRoiSampleOptionSpecified(CommandLine commandLine) {
-        return commandLine.hasOption(FIND_TEMPLATE_IN_SOURCE_IMAGE_ROI_SAMPLE_OPTION_NAME);
+        return commandLine.hasOption(defaults.getFindTemplateInSourceImageRoiSampleOptionName());
     }
 
     private MatchContext createFindDiffRoiSampleContext() {
@@ -291,89 +266,6 @@ public class CmdProcessor {
         return matchContext;
     }
 
-    private Options buildPosixOptions() {
-        final Options posixOptions = new Options();
-        posixOptions.addOption(OptionBuilder.withLongOpt(HELP_OPTION_NAME).
-            withDescription("print this message").
-            create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(SHOW_RESULT_OPTION_NAME).
-            withDescription("Show result in UI.").
-            withType(Boolean.class).
-            create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(FIND_OPTION_NAME).
-            withDescription("Find the template (second image argument) inside of the image (first image argument).").
-            withType(Boolean.class).
-            create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(DIFF_OPTION_NAME).
-            withDescription("Find all differences between two images. Images should have the same size.").
-            withType(Boolean.class).
-            create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(TITLE_OPTION_NAME)
-            .withDescription("Set title into GUI frame. Default: " + defaults.getTitleValue())
-            .hasArg()
-            .withArgName(TITLE_OPTION_NAME)
-            .withType(String.class)
-            .create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(IMAGE1_OPTION_NAME)
-            .withDescription("The first image. In case of looking for template this argument used as source image.")
-            .hasArg()
-            .withArgName(IMAGE1_OPTION_NAME)
-            .withType(String.class)
-            .create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(IMAGE2_OPTION_NAME)
-            .withDescription("The second image. In case of looking for template this argument used as template image.")
-            .hasArg()
-            .withArgName(IMAGE2_OPTION_NAME)
-            .withType(String.class)
-            .create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(RESULT_IMAGE_OPTION_NAME)
-            .withDescription("Path to save result of image comparison. Default location: " + defaults.getResultImageValue().getAbsolutePath())
-            .hasArg()
-            .withArgName(RESULT_IMAGE_OPTION_NAME)
-            .withType(String.class)
-            .create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(RESULT_SOURCE_IMAGE_OPTION_NAME)
-            .withDescription("Path to save result of source image comparison. Default location: " + defaults.getResultSourceImageValue().getAbsolutePath())
-            .hasArg()
-            .withArgName(RESULT_SOURCE_IMAGE_OPTION_NAME)
-            .withType(String.class)
-            .create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(MATCH_SIMILARITY_OPTION_NAME)
-            .withDescription("Use match similarity to search for. Default value: " + defaults.getMatchSimilarityValue())
-            .hasArg()
-            .withArgName(MATCH_SIMILARITY_OPTION_NAME)
-            .withType(Number.class)
-            .create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(LIMIT_OPTION_NAME)
-            .withDescription("Use limit to limit number of found blocks. Default value: " + defaults.getLimitValue())
-            .hasArg()
-            .withArgName(LIMIT_OPTION_NAME)
-            .withType(Number.class)
-            .create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(ROIS_OPTION_NAME)
-            .withDescription("Use region of interests as x1,y1,w1,h1;x2,y2,w2,h2; to search for any differences/templates. "
-                + "For example: 247,137,325,35;1,111,155,155 - describes x,y,width,height for two regions. "
-                + "First - x:247,y:137,width:325,height:35; Second - x:1,y:111,width:155,height:155")
-            .hasArg()
-            .withArgName(ROIS_OPTION_NAME)
-            .withType(String.class)
-            .create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(FIND_DIFF_SAMPLE_OPTION_NAME).
-            withDescription("Find difference with the same bounds sample.").
-            create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(FIND_DIFF_ROI_SAMPLE_OPTION_NAME).
-            withDescription("Find difference with the same bounds inside of predefined region of interests sample.").
-            create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(FIND_TEMPLATE_IN_SOURCE_IMAGE_SAMPLE_OPTION_NAME).
-            withDescription("Find the template in the source image sample.").
-            create());
-        posixOptions.addOption(OptionBuilder.withLongOpt(FIND_TEMPLATE_IN_SOURCE_IMAGE_ROI_SAMPLE_OPTION_NAME).
-            withDescription("Find the template in the source image inside of predefined region of interests sample.").
-            create());
-
-        return posixOptions;
-    }
-
     private void printHelp(final String applicationName, final Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(applicationName, options);
@@ -384,10 +276,16 @@ public class CmdProcessor {
         private Logger logger = LoggerFactory.getLogger(getClass());
 
         private final String[] cmdArgs;
+        private CmdCreator cmdCreator;
         private Defaults defaults;
 
         public Builder(String[] cmdArgs) {
             this.cmdArgs = cmdArgs;
+        }
+
+        public Builder cmdCreator(CmdCreator cmdCreator) {
+            this.cmdCreator = cmdCreator;
+            return this;
         }
 
         public Builder defaults(Defaults defaults) {
@@ -403,7 +301,12 @@ public class CmdProcessor {
                 logger.debug("Default instance will be used for defaults values");
                 defaults = new Defaults();
             }
+            if (cmdCreator == null) {
+                logger.debug("Default instance will be used for cmd creator");
+                cmdCreator = new CmdCreator.Builder().defaults(defaults).build();
+            }
             processor.defaults = defaults;
+            processor.cmdCreator = cmdCreator;
 
             return processor;
         }

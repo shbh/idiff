@@ -1,6 +1,7 @@
 package com.image.diff.cmd.core;
 
 import com.image.diff.core.MatchContext;
+import java.util.List;
 
 public class CmdContextCreator {
 
@@ -21,10 +22,18 @@ public class CmdContextCreator {
         private final String[] cmdArgs;
         private CmdProcessor cmdProcessor;
         private CmdValidator cmdValidator;
+        private CmdCreator cmdCreator;
+        private Defaults defaults;
 
         public Builder(String runArg, String[] cmdArgs) {
             this.runArg = runArg;
             this.cmdArgs = cmdArgs;
+        }
+
+        public Builder defaults(Defaults defaults) {
+            this.defaults = defaults;
+
+            return this;
         }
 
         public Builder cmdProcessor(CmdProcessor cmdProcessor) {
@@ -37,21 +46,47 @@ public class CmdContextCreator {
             return this;
         }
 
+        public Builder cmdCreator(CmdCreator cmdCreator) {
+            this.cmdCreator = cmdCreator;
+            return this;
+        }
+
         public CmdContextCreator build() {
             if (cmdProcessor == null) {
-                cmdProcessor = new CmdProcessor.Builder(cmdArgs).build();
+                cmdProcessor = new CmdProcessor.Builder(cmdArgs).
+                    defaults(defaults).
+                    cmdCreator(cmdCreator).
+                    build();
             }
             if (cmdValidator == null) {
-                cmdValidator = new CmdValidator.Builder(cmdArgs).build();
+                cmdValidator = new CmdValidator.Builder(cmdArgs).
+                    defaults(defaults).
+                    cmdCreator(cmdCreator).
+                    build();
             }
 
             // validate application arguments
-            cmdValidator.validate();
+            List<ErrorMessage> errorMessages = cmdValidator.validate();
+            if (!errorMessages.isEmpty()) {
+                String error = buildErrorMessage(errorMessages);
+                throw new RuntimeException(error);
+            }
 
             CmdContextCreator creator = new CmdContextCreator();
             creator.runArg = runArg;
             creator.cmdProcessor = cmdProcessor;
             return creator;
+        }
+
+        private String buildErrorMessage(List<ErrorMessage> errorMessages) {
+            StringBuilder sb = new StringBuilder();
+            for (ErrorMessage errorMessage : errorMessages) {
+                sb.append(" --- ");
+                sb.append(errorMessage.getMessage());
+                sb.append("\n");
+            }
+
+            return sb.toString();
         }
     }
 }
