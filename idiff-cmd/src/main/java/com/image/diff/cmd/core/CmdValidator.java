@@ -27,6 +27,12 @@ public class CmdValidator {
     List<ErrorMessage> validate() {
         final List<ErrorMessage> errors = new ArrayList<ErrorMessage>();
 
+        boolean hasAnyArgument = (cmdArgs != null && cmdArgs.length > 0);
+        if (!hasAnyArgument) {
+            // nothing to validate, just show a help
+            return errors;
+        }
+
         CommandLine commandLine;
         try {
             Options options = cmdCreator.getOptions();
@@ -40,13 +46,13 @@ public class CmdValidator {
 
         boolean helpArgument = isHelpArgument(commandLine);
         if (helpArgument) {
-            // nothing to validate
+            // nothing to validate, just show a help
             return errors;
         }
 
         boolean sampleArgument = isSampleArgument(commandLine);
         if (sampleArgument) {
-            // nothing to validate
+            // nothing to validate, presume that samples configured properly
             return errors;
         }
 
