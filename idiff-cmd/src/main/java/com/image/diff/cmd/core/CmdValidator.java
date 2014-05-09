@@ -60,6 +60,38 @@ public class CmdValidator {
             return errors;
         }
 
+        boolean matchSimilarityUsed = commandLine.hasOption(defaults.getMatchSimilarityOptionName());
+        if (matchSimilarityUsed) {
+            String matchSimilarityString = commandLine.getOptionValue(defaults.getMatchSimilarityOptionName());
+            try {
+                double matchSimilarity = Double.valueOf(matchSimilarityString);
+
+                if (matchSimilarity <= 0 && matchSimilarity >= 1) {
+                    errors.add(new ErrorMessage.Builder().message("Expected matching similarity should be from 0..1 (both exclusive). Passed: " + matchSimilarity).build());
+                }
+            } catch (NumberFormatException ex) {
+                String message = "Match similarity value does not have the appropriate format: " + matchSimilarityString;
+                logger.debug(message, ex);
+                errors.add(new ErrorMessage.Builder().message(message).build());
+            }
+        }
+
+        boolean limitUsed = commandLine.hasOption(defaults.getLimitOptionName());
+        if (limitUsed) {
+            String limitString = commandLine.getOptionValue(defaults.getLimitOptionName());
+            try {
+                int limit = Integer.valueOf(limitString);
+
+                if (limit <= 0) {
+                    errors.add(new ErrorMessage.Builder().message("Expected limit should be greater than 0. Passed: " + limit).build());
+                }
+            } catch (NumberFormatException ex) {
+                String message = "Limit value does not have the appropriate format: " + limitString;
+                logger.debug(message, ex);
+                errors.add(new ErrorMessage.Builder().message(message).build());
+            }
+        }
+
         final ValidationContext context = new ValidationContext();
         context.setCommandLine(commandLine);
         if (!errors.isEmpty()) {
@@ -97,7 +129,7 @@ public class CmdValidator {
         if (bufferedImage1 != null && bufferedImage2 != null) {
             if (bufferedImage1.getHeight() < bufferedImage2.getHeight()
                 || bufferedImage1.getWidth() < bufferedImage2.getWidth()) {
-                context.addError(new ErrorMessage.Builder().message("First image (the source) must be greater than second image (the template)").build());
+                context.addError(new ErrorMessage.Builder().message("First image (the source) should be greater than second image (the template)").build());
             }
         }
     }
@@ -124,7 +156,7 @@ public class CmdValidator {
         if (bufferedImage1 != null && bufferedImage2 != null) {
             if (bufferedImage1.getHeight() != bufferedImage2.getHeight()
                 || bufferedImage1.getWidth() != bufferedImage2.getWidth()) {
-                context.addError(new ErrorMessage.Builder().message("First image size must be equals to second image size").build());
+                context.addError(new ErrorMessage.Builder().message("First image size should be equals to second image size").build());
             }
         }
     }

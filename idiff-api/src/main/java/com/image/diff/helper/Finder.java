@@ -69,9 +69,11 @@ public class Finder {
             Validate.notNull(context.getImage2(), "Please set second image.");
             Validate.notNull(context.getResultImage(), "Please set result image.");
             Validate.notNull(context.getResultSourceImage(), "Please set result source image.");
-            Validate.isTrue(context.getMatchSimilarity() > 0 && context.getMatchSimilarity() < 1, "Expected matching similarity should be from 0..1 (both exclusive).");
+            Validate.isTrue(context.getMatchSimilarity() > 0 && context.getMatchSimilarity() < 1,
+                "Expected matching similarity should be from 0..1 (both exclusive). Passed: " + context.getMatchSimilarity());
             Validate.notNull(context.getMatchMethod(), "Please set match method.");
-            Validate.isTrue(context.getLimit() > 0, "Expected limit of results should be > 0.");
+            Validate.isTrue(context.getLimit() > 0,
+                "Expected limit of results should be greater than 0. Passed: " + context.getLimit());
             Validate.notNull(context.getRois(), "List of region of interests should not be null.");
 
             Validate.isTrue(context.getImage1().exists(), "First image should exists.");
