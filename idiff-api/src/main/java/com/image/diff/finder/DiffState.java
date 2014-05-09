@@ -12,13 +12,19 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DiffImageFinder implements ImageFinder {
+public class DiffState implements State {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    private final ImageHelper imageHelper = new ImageHelper();
+    private final ImageHelper imageHelper;
+    private final MatchContext context;
+
+    public DiffState(MatchContext context, ImageHelper imageHelper) {
+        this.context = context;
+        this.imageHelper = imageHelper;
+    }
 
     @Override
-    public List<Match> find(MatchContext context) {
+    public List<Match> find() {
         final List<Match> matchResults = new ArrayList<Match>();
         IplImage firstImage = imageHelper.createGrayImageFrom(context.getBufferedImage1());
         IplImage secondImage = imageHelper.createGrayImageFrom(context.getBufferedImage2());
@@ -87,5 +93,20 @@ public class DiffImageFinder implements ImageFinder {
         }
 
         return isIntersect;
+    }
+
+    @Override
+    public void showResult() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void highlightRegions() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void highlightMatchedElements() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

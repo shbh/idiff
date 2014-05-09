@@ -18,7 +18,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         
-        <mainClass>com.image.diff.RunApp</mainClass>
+        <mainClass>com.image.diff.cmd.RunApp</mainClass>
         
         <idiff-api.version>1.0</idiff-api.version>
     </properties>

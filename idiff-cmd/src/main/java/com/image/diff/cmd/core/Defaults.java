@@ -1,5 +1,8 @@
-package com.image.diff.core;
+package com.image.diff.cmd.core;
 
+import com.image.diff.core.MatchContext;
+import com.image.diff.core.Roi;
+import com.image.diff.core.TemplateMatchMethod;
 import java.io.File;
 
 public class Defaults {

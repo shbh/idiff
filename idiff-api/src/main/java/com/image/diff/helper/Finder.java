@@ -3,13 +3,12 @@ package com.image.diff.helper;
 import com.image.diff.visual.HighlightElement;
 import com.image.diff.core.Match;
 import com.image.diff.core.MatchContext;
-import com.image.diff.core.MatchType;
 import com.image.diff.ui.FindResultWindow;
 import com.image.diff.core.Roi;
 import com.image.diff.ui.DiffResultWindow;
-import com.image.diff.finder.DiffImageFinder;
-import com.image.diff.finder.ImageFinder;
-import com.image.diff.finder.TemplateImageFinder;
+import com.image.diff.finder.DiffState;
+import com.image.diff.finder.State;
+import com.image.diff.finder.FindState;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -28,32 +27,33 @@ public class Finder {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     private final MatchContext context;
-    private ImageFinder imageFinder;
+    private State imageFinder;
 
     private Finder(MatchContext context) {
         this.context = context;
     }
 
     public List<Match> find() {
-        List<Match> matchResults = imageFinder.find(context);
-        context.addMatches(matchResults);
-
-        highlightRegions();
-        highlightMatchedElements(matchResults);
-
-        if (context.isShowResult()) {
-            showResult();
-        }
-
-        return matchResults;
+//        List<Match> matchResults = imageFinder.find(context);
+//        context.addMatches(matchResults);
+//
+//        highlightRegions();
+//        highlightMatchedElements();
+//
+//        if (context.isShowResult()) {
+//            showResult();
+//        }
+//
+//        return matchResults;
+        throw new UnsupportedOperationException();
     }
 
     protected void showResult() {
-        if (MatchType.DIFFERENCES == context.getMatchType()) {
-            showDifferencesResultWindow();
-        } else {
-            showResultWindow();
-        }
+//        if (MatchType.DIFFERENCES == context.getMatchType()) {
+//            showDifferencesResultWindow();
+//        } else {
+//            showResultWindow();
+//        }
     }
 
     protected void showDifferencesResultWindow() {
@@ -79,16 +79,16 @@ public class Finder {
     protected void highlightRegions() {
         for (Roi r : context.getRois()) {
             try {
-                if (context.getMatchType() == MatchType.DIFFERENCES) {
-                    highlightElementOnSourceImage(new HighlightElement.Builder().
-                        x(r.getX()).
-                        y(r.getY()).
-                        width(r.getWidth()).
-                        height(r.getHeight()).
-                        borderColor(Color.GREEN).
-                        areaColor(new Color(245, 255, 255, 255 * 50 / 100)).
-                        build());
-                }
+//                if (context.getMatchType() == MatchType.DIFFERENCES) {
+//                    highlightElementOnSourceImage(new HighlightElement.Builder().
+//                        x(r.getX()).
+//                        y(r.getY()).
+//                        width(r.getWidth()).
+//                        height(r.getHeight()).
+//                        borderColor(Color.GREEN).
+//                        areaColor(new Color(245, 255, 255, 255 * 50 / 100)).
+//                        build());
+//                }
 
                 highlightElementOnResultImage(new HighlightElement.Builder().
                     x(r.getX()).
@@ -103,8 +103,8 @@ public class Finder {
         }
     }
 
-    protected void highlightMatchedElements(List<Match> matchResults) {
-        for (Match match : matchResults) {
+    protected void highlightMatchedElements() {
+        for (Match match : context.getMatches()) {
             int x = match.getX();
             int y = match.getY();
             int width = match.getWidth();
@@ -113,17 +113,17 @@ public class Finder {
             String text = getHighlightElementText(match);
 
             try {
-                if (context.getMatchType() == MatchType.DIFFERENCES) {
-                    highlightElementOnSourceImage(new HighlightElement.Builder().
-                        x(x).
-                        y(y).
-                        width(width).
-                        height(height).
-                        borderColor(Color.GREEN).
-                        areaColor(new Color(0, 255, 0, 255 * 50 / 100)).
-                        build()
-                    );
-                }
+//                if (context.getMatchType() == MatchType.DIFFERENCES) {
+//                    highlightElementOnSourceImage(new HighlightElement.Builder().
+//                        x(x).
+//                        y(y).
+//                        width(width).
+//                        height(height).
+//                        borderColor(Color.GREEN).
+//                        areaColor(new Color(0, 255, 0, 255 * 50 / 100)).
+//                        build()
+//                    );
+//                }
 
                 highlightElementOnResultImage(new HighlightElement.Builder().
                     x(x).
@@ -188,14 +188,14 @@ public class Finder {
     public static final class Builder {
 
         private final MatchContext context;
-        private ImageFinder imageFinder;
+        private State imageFinder;
         private FinderValidator finderValidator;
 
         public Builder(MatchContext context) {
             this.context = context;
         }
 
-        public Builder imageFinder(ImageFinder imageFinder) {
+        public Builder imageFinder(State imageFinder) {
             this.imageFinder = imageFinder;
             return this;
         }
@@ -220,20 +220,19 @@ public class Finder {
             postInitProcessContext(context);
             finderValidator.validate(context);
 
-            if (imageFinder == null) {
-                // initialize it based on context values
-                switch (context.getMatchType()) {
-                    case DIFFERENCES:
-                        imageFinder = new DiffImageFinder();
-                        break;
-                    case TEMPLATES:
-                        imageFinder = new TemplateImageFinder();
-                        break;
-                    default:
-                        throw new IllegalStateException("Can't find handler for type: " + context.getMatchType());
-                }
-            }
-
+//            if (imageFinder == null) {
+//                // initialize it based on context values
+//                switch (context.getMatchType()) {
+//                    case DIFFERENCES:
+//                        imageFinder = new DiffState();
+//                        break;
+//                    case TEMPLATES:
+//                        imageFinder = new FindState();
+//                        break;
+//                    default:
+//                        throw new IllegalStateException("Can't find handler for type: " + context.getMatchType());
+//                }
+//            }
             Finder finder = new Finder(context);
             finder.imageFinder = imageFinder;
 
@@ -242,16 +241,16 @@ public class Finder {
 
         private void postInitProcessContext(MatchContext context) {
             // copy content from images to result images to show it in final UI frame, if needed
-            try {
-                if (context.getMatchType() == MatchType.DIFFERENCES) {
-                    FileUtils.copyFile(context.getImage2(), context.getResultImage());
-                    FileUtils.copyFile(context.getImage1(), context.getResultSourceImage());
-                } else {
-                    FileUtils.copyFile(context.getImage1(), context.getResultImage());
-                }
-            } catch (IOException ex) {
-                throw new IllegalStateException("Could not initialize result image file: " + context.getResultImage().getAbsolutePath(), ex);
-            }
+//            try {
+//                if (context.getMatchType() == MatchType.DIFFERENCES) {
+//                    FileUtils.copyFile(context.getImage2(), context.getResultImage());
+//                    FileUtils.copyFile(context.getImage1(), context.getResultSourceImage());
+//                } else {
+//                    FileUtils.copyFile(context.getImage1(), context.getResultImage());
+//                }
+//            } catch (IOException ex) {
+//                throw new IllegalStateException("Could not initialize result image file: " + context.getResultImage().getAbsolutePath(), ex);
+//            }
 
             BufferedImage bufferedImage1;
             try {

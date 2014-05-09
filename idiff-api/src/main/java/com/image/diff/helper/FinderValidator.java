@@ -10,7 +10,7 @@ public class FinderValidator {
         Validate.notNull(context.getMatchMethod(), "Please set match method.");
         Validate.isTrue(context.getLimit() > 0, "Expected limit of results should be > 0.");
         Validate.notNull(context.getRois(), "List of region of interests should not be null.");
-        Validate.notNull(context.getMatchType(), "Match type should not be null.");
+//        Validate.notNull(context.getMatchType(), "Match type should not be null.");
 
         Validate.isTrue(context.getImage1().exists(), "First image should exists.");
         Validate.isTrue(context.getImage2().exists(), "Second image should exists.");

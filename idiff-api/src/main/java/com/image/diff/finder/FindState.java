@@ -21,7 +21,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TemplateImageFinder implements ImageFinder {
+public class FindState implements State {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     private final ImageHelper imageHelper = new ImageHelper();
@@ -73,7 +73,6 @@ public class TemplateImageFinder implements ImageFinder {
         return result;
     }
 
-    @Override
     public List<Match> find(MatchContext context) {
         BufferedImage sourceBufferedImage = context.getBufferedImage1();
         BufferedImage templateBufferedImage = context.getBufferedImage2();
@@ -121,5 +120,25 @@ public class TemplateImageFinder implements ImageFinder {
         cvReleaseImage(container.getTemplateImage());
         cvReleaseImage(container.getResultImage());
         return matchResults;
+    }
+
+    @Override
+    public List<Match> find() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void showResult() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void highlightRegions() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void highlightMatchedElements() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

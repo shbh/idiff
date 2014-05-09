@@ -1,6 +1,5 @@
-package com.image.diff.helper;
+package com.image.diff.cmd.core;
 
-import com.image.diff.core.Defaults;
 import com.image.diff.core.MatchContext;
 import com.image.diff.core.Roi;
 import com.image.diff.core.TemplateMatchMethod;
@@ -17,7 +16,7 @@ import org.apache.commons.cli.PosixParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CommandLineHelper {
+public class CmdProcessor {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     public static final String HELP_OPTION_NAME = "help";
@@ -42,21 +41,20 @@ public class CommandLineHelper {
     public static final String ROI_DELIMITER = "\\s*;\\s*";
     public static final String ROI_PARAMS_DELIMITER = "\\s*,\\s*";
 
-    private final String[] commandLineArguments;
-    private final Defaults defaults;
+    private final String[] cmdArgs;
+    private Defaults defaults;
 
-    public CommandLineHelper(String[] commandLineArguments, Defaults defaults) {
-        this.commandLineArguments = commandLineArguments;
-        this.defaults = defaults;
+    private CmdProcessor(String[] cmdArgs) {
+        this.cmdArgs = cmdArgs;
     }
 
-    public MatchContext createContext(String runArg) {
+    MatchContext createContext(String runArg) {
         final CommandLineParser cmdLinePosixParser = new PosixParser();
         final Options posixOptions = buildPosixOptions();
         CommandLine commandLine;
         try {
-            commandLine = cmdLinePosixParser.parse(posixOptions, commandLineArguments);
-            boolean noArgumentsSpecified = commandLineArguments == null || commandLineArguments.length == 0;
+            commandLine = cmdLinePosixParser.parse(posixOptions, cmdArgs);
+            boolean noArgumentsSpecified = cmdArgs == null || cmdArgs.length == 0;
             if (isHelpOptionSpecified(commandLine)) {
                 printHelp(runArg, posixOptions);
                 // just exit, that's all we need to do in this case ;-)
@@ -379,5 +377,35 @@ public class CommandLineHelper {
     private void printHelp(final String applicationName, final Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(applicationName, options);
+    }
+
+    public static class Builder {
+
+        private Logger logger = LoggerFactory.getLogger(getClass());
+
+        private final String[] cmdArgs;
+        private Defaults defaults;
+
+        public Builder(String[] cmdArgs) {
+            this.cmdArgs = cmdArgs;
+        }
+
+        public Builder defaults(Defaults defaults) {
+            this.defaults = defaults;
+
+            return this;
+        }
+
+        public CmdProcessor build() {
+            CmdProcessor processor = new CmdProcessor(cmdArgs);
+
+            if (defaults == null) {
+                logger.debug("Default instance will be used for defaults values");
+                defaults = new Defaults();
+            }
+            processor.defaults = defaults;
+
+            return processor;
+        }
     }
 }
