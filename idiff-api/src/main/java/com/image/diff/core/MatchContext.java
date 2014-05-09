@@ -7,7 +7,6 @@ import java.util.List;
 
 public class MatchContext {
 
-    private final String applicationName;
     private boolean showResult;
     private String title;
     private File image1;
@@ -20,16 +19,9 @@ public class MatchContext {
     private TemplateMatchMethod matchMethod;
     private int limit;
     private final List<Roi> rois = new ArrayList<Roi>();
-    private MatchType matchType;
+    private boolean findSpecified;
+    private boolean diffSpecified;
     private final List<Match> matches = new ArrayList<Match>();
-
-    public MatchContext(String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public String getApplicationName() {
-        return applicationName;
-    }
 
     public boolean isShowResult() {
         return showResult;
@@ -143,16 +135,24 @@ public class MatchContext {
         this.matches.add(match);
     }
 
-    public MatchType getMatchType() {
-        return matchType;
+    public boolean isFindSpecified() {
+        return findSpecified;
     }
 
-    public void setMatchType(MatchType matchType) {
-        this.matchType = matchType;
+    public void setFindSpecified(boolean findSpecified) {
+        this.findSpecified = findSpecified;
+    }
+
+    public boolean isDiffSpecified() {
+        return diffSpecified;
+    }
+
+    public void setDiffSpecified(boolean diffSpecified) {
+        this.diffSpecified = diffSpecified;
     }
 
     @Override
     public String toString() {
-        return "showResult=" + showResult + ", title=" + title + ", image1=" + image1 + ", image2=" + image2 + ", bufferedImage1=" + bufferedImage1 + ", bufferedImage2=" + bufferedImage2 + ", resultImage=" + resultImage + ", resultSourceImage=" + resultSourceImage + ", matchSimilarity=" + matchSimilarity + ", matchMethod=" + matchMethod + ", limit=" + limit + ", rois=" + rois + ", matchType=" + matchType + ", matches=" + matches;
+        return "MatchContext{" + "showResult=" + showResult + ", title=" + title + ", image1=" + image1 + ", image2=" + image2 + ", bufferedImage1=" + bufferedImage1 + ", bufferedImage2=" + bufferedImage2 + ", resultImage=" + resultImage + ", resultSourceImage=" + resultSourceImage + ", matchSimilarity=" + matchSimilarity + ", matchMethod=" + matchMethod + ", limit=" + limit + ", rois=" + rois + ", findSpecified=" + findSpecified + ", diffSpecified=" + diffSpecified + ", matches=" + matches + '}';
     }
 }
