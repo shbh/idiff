@@ -1,8 +1,11 @@
 package com.image.diff.cmd.core;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.imageio.ImageIO;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -10,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CmdValidator {
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     private final String[] cmdArgs;
     private CmdCreator cmdCreator;
@@ -27,7 +32,9 @@ public class CmdValidator {
             Options options = cmdCreator.getOptions();
             commandLine = cmdCreator.getCommandLine(options, cmdArgs);
         } catch (ParseException ex) {
-            errors.add(new ErrorMessage.Builder().message("Error happened during parsing of a command-line arguments").build());
+            String message = "Error happened during parsing of a command-line arguments";
+            logger.debug(message, ex);
+            errors.add(new ErrorMessage.Builder().message(message).build());
             return errors;
         }
 
@@ -63,10 +70,19 @@ public class CmdValidator {
             errors.add(new ErrorMessage.Builder().message("First image (the source) argument expected").build());
         }
 
+        BufferedImage bufferedImage1 = null;
         if (image1Passed) {
             File image1File = new File(commandLine.getOptionValue(defaults.getImage1OptionName()));
             if (!image1File.exists()) {
                 errors.add(new ErrorMessage.Builder().message("First image (the source) doesn't exists. Please make sure you provide correct path").build());
+            } else {
+                try {
+                    bufferedImage1 = ImageIO.read(image1File);
+                } catch (IOException ex) {
+                    String message = "Could not read first image (the source): " + image1File.getAbsolutePath();
+                    logger.debug(message, ex);
+                    errors.add(new ErrorMessage.Builder().message(message).build());
+                }
             }
         }
 
@@ -75,10 +91,26 @@ public class CmdValidator {
             errors.add(new ErrorMessage.Builder().message("Second image (the template) argument expected").build());
         }
 
+        BufferedImage bufferedImage2 = null;
         if (image2Passed) {
             File image2File = new File(commandLine.getOptionValue(defaults.getImage2OptionName()));
             if (!image2File.exists()) {
                 errors.add(new ErrorMessage.Builder().message("Second image (the template) doesn't exists. Please make sure you provide correct path").build());
+            } else {
+                try {
+                    bufferedImage2 = ImageIO.read(image2File);
+                } catch (IOException ex) {
+                    String message = "Could not read second image (the template): " + image2File.getAbsolutePath();
+                    logger.debug(message, ex);
+                    errors.add(new ErrorMessage.Builder().message(message).build());
+                }
+            }
+        }
+
+        if (bufferedImage1 != null && bufferedImage2 != null) {
+            if (bufferedImage1.getHeight() < bufferedImage2.getHeight()
+                || bufferedImage1.getWidth() < bufferedImage2.getWidth()) {
+                errors.add(new ErrorMessage.Builder().message("First image (the source) must be greater than second image (the template)").build());
             }
         }
 
