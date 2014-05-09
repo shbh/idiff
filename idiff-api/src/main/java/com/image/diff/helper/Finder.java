@@ -1,24 +1,14 @@
 package com.image.diff.helper;
 
-import com.image.diff.visual.HighlightElement;
 import com.image.diff.core.Match;
 import com.image.diff.core.MatchContext;
-import com.image.diff.ui.FindResultWindow;
-import com.image.diff.core.Roi;
-import com.image.diff.ui.DiffResultWindow;
-import com.image.diff.finder.DiffState;
-import com.image.diff.finder.State;
-import com.image.diff.finder.FindState;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import com.image.diff.finder.DiffStrategy;
+import com.image.diff.finder.FindStrategy;
+import com.image.diff.finder.SearchStrategy;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,181 +17,49 @@ public class Finder {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     private final MatchContext context;
-    private State imageFinder;
+    private SearchStrategy searchStrategy;
 
     private Finder(MatchContext context) {
         this.context = context;
     }
 
     public List<Match> find() {
-//        List<Match> matchResults = imageFinder.find(context);
-//        context.addMatches(matchResults);
-//
-//        highlightRegions();
-//        highlightMatchedElements();
-//
-//        if (context.isShowResult()) {
-//            showResult();
-//        }
-//
-//        return matchResults;
-        throw new UnsupportedOperationException();
-    }
+        List<Match> matchResults = searchStrategy.find();
+        context.addMatches(matchResults);
 
-    protected void showResult() {
-//        if (MatchType.DIFFERENCES == context.getMatchType()) {
-//            showDifferencesResultWindow();
-//        } else {
-//            showResultWindow();
-//        }
-    }
+        searchStrategy.highlightRegions();
+        searchStrategy.highlightMatchedElements();
 
-    protected void showDifferencesResultWindow() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                DiffResultWindow resultWindow = new DiffResultWindow(context);
-                resultWindow.show();
-            }
-        });
-    }
-
-    protected void showResultWindow() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                FindResultWindow resultWindow = new FindResultWindow(context);
-                resultWindow.show();
-            }
-        });
-    }
-
-    protected void highlightRegions() {
-        for (Roi r : context.getRois()) {
-            try {
-//                if (context.getMatchType() == MatchType.DIFFERENCES) {
-//                    highlightElementOnSourceImage(new HighlightElement.Builder().
-//                        x(r.getX()).
-//                        y(r.getY()).
-//                        width(r.getWidth()).
-//                        height(r.getHeight()).
-//                        borderColor(Color.GREEN).
-//                        areaColor(new Color(245, 255, 255, 255 * 50 / 100)).
-//                        build());
-//                }
-
-                highlightElementOnResultImage(new HighlightElement.Builder().
-                    x(r.getX()).
-                    y(r.getY()).
-                    width(r.getWidth()).
-                    height(r.getHeight()).
-                    areaColor(new Color(245, 255, 255, 255 * 50 / 100)).
-                    build());
-            } catch (IOException ex) {
-                logger.error("Can't highlight area", ex);
-            }
-        }
-    }
-
-    protected void highlightMatchedElements() {
-        for (Match match : context.getMatches()) {
-            int x = match.getX();
-            int y = match.getY();
-            int width = match.getWidth();
-            int height = match.getHeight();
-            double score = match.getScore();
-            String text = getHighlightElementText(match);
-
-            try {
-//                if (context.getMatchType() == MatchType.DIFFERENCES) {
-//                    highlightElementOnSourceImage(new HighlightElement.Builder().
-//                        x(x).
-//                        y(y).
-//                        width(width).
-//                        height(height).
-//                        borderColor(Color.GREEN).
-//                        areaColor(new Color(0, 255, 0, 255 * 50 / 100)).
-//                        build()
-//                    );
-//                }
-
-                highlightElementOnResultImage(new HighlightElement.Builder().
-                    x(x).
-                    y(y).
-                    width(width).
-                    height(height).
-                    text(text).
-                    build()
-                );
-            } catch (IOException ex) {
-                logger.error("Can't highlight element", ex);
-            }
-        }
-    }
-
-    protected String getHighlightElementText(Match match) {
-        double score = match.getScore();
-        int roundedScore = (int) (score * 100);
-
-        return roundedScore + "%";
-    }
-
-    protected void highlightElementOnSourceImage(HighlightElement element) throws IOException {
-        highlightElement(context.getResultSourceImage(), element);
-    }
-
-    protected void highlightElementOnResultImage(HighlightElement element) throws IOException {
-        highlightElement(context.getResultImage(), element);
-    }
-
-    protected void highlightElement(File image, HighlightElement element) throws IOException {
-        BufferedImage canvas = ImageIO.read(image);
-
-        Graphics2D g2 = canvas.createGraphics();
-
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-            RenderingHints.VALUE_ANTIALIAS_ON);
-
-        // border
-        g2.setColor(element.getBorderColor());
-        g2.drawRect(element.getX(), element.getY(), element.getWidth(), element.getHeight());
-
-        // area
-        g2.setColor(element.getAreaColor());
-        g2.fillRect(element.getX(), element.getY(), element.getWidth(), element.getHeight());
-
-        // text
-        if (element.getText() != null && !element.getText().isEmpty()) {
-            g2.setColor(element.getFontColor());
-            int centerX = element.getX() + 1;
-            int centerY = element.getY() + element.getHeight() / 2;
-            g2.setFont(element.getFont());
-            g2.drawString(element.getText(), centerX, centerY);
+        if (context.isShowResult()) {
+            searchStrategy.showResult();
         }
 
-        g2.dispose();
-
-        // update result image with highlights
-        ImageIO.write(canvas, "PNG", image);
+        return matchResults;
     }
 
     public static final class Builder {
 
         private final MatchContext context;
-        private State imageFinder;
-        private FinderValidator finderValidator;
+        private ImageHelper imageHelper;
+        private HighlightHelper highlightHelper;
+        private SearchStrategy searchStrategy;
 
         public Builder(MatchContext context) {
             this.context = context;
         }
 
-        public Builder imageFinder(State imageFinder) {
-            this.imageFinder = imageFinder;
+        public Builder imageHelper(ImageHelper imageHelper) {
+            this.imageHelper = imageHelper;
             return this;
         }
 
-        public Builder finderValidator(FinderValidator finderValidator) {
-            this.finderValidator = finderValidator;
+        public Builder highlightHelper(HighlightHelper highlightHelper) {
+            this.highlightHelper = highlightHelper;
+            return this;
+        }
+
+        public Builder searchStrategy(SearchStrategy imageFinder) {
+            this.searchStrategy = imageFinder;
             return this;
         }
 
@@ -211,47 +69,39 @@ public class Finder {
             Validate.notNull(context.getImage2(), "Please set second image.");
             Validate.notNull(context.getResultImage(), "Please set result image.");
             Validate.notNull(context.getResultSourceImage(), "Please set result source image.");
+            Validate.isTrue(context.getMatchSimilarity() > 0 && context.getMatchSimilarity() < 1, "Expected matching similarity should be from 0..1 (both exclusive).");
+            Validate.notNull(context.getMatchMethod(), "Please set match method.");
+            Validate.isTrue(context.getLimit() > 0, "Expected limit of results should be > 0.");
+            Validate.notNull(context.getRois(), "List of region of interests should not be null.");
 
-            if (finderValidator == null) {
-                // use default if no specified
-                finderValidator = new FinderValidator();
+            Validate.isTrue(context.getImage1().exists(), "First image should exists.");
+            Validate.isTrue(context.getImage2().exists(), "Second image should exists.");
+
+            // init images in context
+            initImages();
+
+            if (searchStrategy == null) {
+                // initialize it based on context values
+                if (context.isDiffSpecified()) {
+                    searchStrategy = new DiffStrategy.Builder(context).
+                        highlightHelper(highlightHelper).
+                        imageHelper(imageHelper).build();
+                } else if (context.isFindSpecified()) {
+                    searchStrategy = new FindStrategy.Builder(context).
+                        highlightHelper(highlightHelper).
+                        imageHelper(imageHelper).build();
+                } else {
+                    throw new IllegalStateException("Search type undefined");
+                }
             }
 
-            postInitProcessContext(context);
-            finderValidator.validate(context);
-
-//            if (imageFinder == null) {
-//                // initialize it based on context values
-//                switch (context.getMatchType()) {
-//                    case DIFFERENCES:
-//                        imageFinder = new DiffState();
-//                        break;
-//                    case TEMPLATES:
-//                        imageFinder = new FindState();
-//                        break;
-//                    default:
-//                        throw new IllegalStateException("Can't find handler for type: " + context.getMatchType());
-//                }
-//            }
             Finder finder = new Finder(context);
-            finder.imageFinder = imageFinder;
+            finder.searchStrategy = searchStrategy;
 
             return finder;
         }
 
-        private void postInitProcessContext(MatchContext context) {
-            // copy content from images to result images to show it in final UI frame, if needed
-//            try {
-//                if (context.getMatchType() == MatchType.DIFFERENCES) {
-//                    FileUtils.copyFile(context.getImage2(), context.getResultImage());
-//                    FileUtils.copyFile(context.getImage1(), context.getResultSourceImage());
-//                } else {
-//                    FileUtils.copyFile(context.getImage1(), context.getResultImage());
-//                }
-//            } catch (IOException ex) {
-//                throw new IllegalStateException("Could not initialize result image file: " + context.getResultImage().getAbsolutePath(), ex);
-//            }
-
+        private void initImages() {
             BufferedImage bufferedImage1;
             try {
                 bufferedImage1 = ImageIO.read(context.getImage1());

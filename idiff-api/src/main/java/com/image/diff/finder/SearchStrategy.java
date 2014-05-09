@@ -3,7 +3,7 @@ package com.image.diff.finder;
 import com.image.diff.core.Match;
 import java.util.List;
 
-public interface State {
+public interface SearchStrategy {
 
     List<Match> find();
 
