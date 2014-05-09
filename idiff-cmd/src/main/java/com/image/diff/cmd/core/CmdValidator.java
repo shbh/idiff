@@ -60,99 +60,117 @@ public class CmdValidator {
             return errors;
         }
 
-        List<ErrorMessage> validateErrors = null;
+        ValidationContext context = new ValidationContext();
+        context.setCommandLine(commandLine);
+        if (!errors.isEmpty()) {
+            context.addErrors(errors);
+        }
+
         if (findModeUsed) {
-            validateErrors = validateFindMode(commandLine);
+            validateFindMode(context);
         } else if (diffModeUsed) {
-            validateErrors = validateDiffMode(commandLine);
+            validateDiffMode(context);
         }
 
-        if (validateErrors != null && !validateErrors.isEmpty()) {
-            errors.addAll(validateErrors);
-        }
-
-        return errors;
+        return context.getErrors();
     }
 
-    private List<ErrorMessage> validateFindMode(CommandLine commandLine) {
-        List<ErrorMessage> errors = validateImages(commandLine);
-
-        return errors;
-    }
-
-    private List<ErrorMessage> validateDiffMode(CommandLine commandLine) {
-        final List<ErrorMessage> errors = validateImages(commandLine);
-
-        return errors;
-    }
-
-    private List<ErrorMessage> validateImages(CommandLine commandLine) {
-        final List<ErrorMessage> errors = new ArrayList<ErrorMessage>();
+    private void validateFindMode(ValidationContext context) {
+        CommandLine commandLine = context.getCommandLine();
 
         boolean image1Passed = commandLine.hasOption(defaults.getImage1OptionName());
         if (!image1Passed) {
-            errors.add(new ErrorMessage.Builder().message("First image (the source) argument expected").build());
+            context.addError(new ErrorMessage.Builder().message("First image (the source) argument expected").build());
         }
 
-        BufferedImage bufferedImage1 = validateFirstImage(image1Passed, commandLine, errors);
+        validateFirstImage(image1Passed, context);
+        BufferedImage bufferedImage1 = context.getBufferedImage1();
 
         boolean image2Passed = commandLine.hasOption(defaults.getImage2OptionName());
         if (!image2Passed) {
-            errors.add(new ErrorMessage.Builder().message("Second image (the template) argument expected").build());
+            context.addError(new ErrorMessage.Builder().message("Second image (the template) argument expected").build());
         }
 
-        BufferedImage bufferedImage2 = validateSecondImage(image2Passed, commandLine, errors);
+        validateSecondImage(image2Passed, context);
+        BufferedImage bufferedImage2 = context.getBufferedImage2();
 
         if (bufferedImage1 != null && bufferedImage2 != null) {
             if (bufferedImage1.getHeight() < bufferedImage2.getHeight()
                 || bufferedImage1.getWidth() < bufferedImage2.getWidth()) {
-                errors.add(new ErrorMessage.Builder().message("First image (the source) must be greater than second image (the template)").build());
+                context.addError(new ErrorMessage.Builder().message("First image (the source) must be greater than second image (the template)").build());
             }
         }
-
-        return errors;
     }
 
-    private BufferedImage validateFirstImage(boolean image1Passed, CommandLine commandLine, final List<ErrorMessage> errors) {
+    private void validateDiffMode(ValidationContext context) {
+        CommandLine commandLine = context.getCommandLine();
+
+        boolean image1Passed = commandLine.hasOption(defaults.getImage1OptionName());
+        if (!image1Passed) {
+            context.addError(new ErrorMessage.Builder().message("First image argument expected").build());
+        }
+
+        validateFirstImage(image1Passed, context);
+        BufferedImage bufferedImage1 = context.getBufferedImage1();
+
+        boolean image2Passed = commandLine.hasOption(defaults.getImage2OptionName());
+        if (!image2Passed) {
+            context.addError(new ErrorMessage.Builder().message("Second image argument expected").build());
+        }
+
+        validateSecondImage(image2Passed, context);
+        BufferedImage bufferedImage2 = context.getBufferedImage2();
+
+        if (bufferedImage1 != null && bufferedImage2 != null) {
+            if (bufferedImage1.getHeight() != bufferedImage2.getHeight()
+                || bufferedImage1.getWidth() != bufferedImage2.getWidth()) {
+                context.addError(new ErrorMessage.Builder().message("First image size must be equals to second image size").build());
+            }
+        }
+    }
+
+    private void validateFirstImage(boolean image1Passed, ValidationContext context) {
+        CommandLine commandLine = context.getCommandLine();
         BufferedImage bufferedImage1 = null;
 
         if (image1Passed) {
             File image1File = new File(commandLine.getOptionValue(defaults.getImage1OptionName()));
             if (!image1File.exists()) {
-                errors.add(new ErrorMessage.Builder().message("First image (the source) doesn't exists. Please make sure you provide correct path").build());
+                context.addError(new ErrorMessage.Builder().message("First image (the source) doesn't exists. Please make sure you provide correct path").build());
             } else {
                 try {
                     bufferedImage1 = ImageIO.read(image1File);
                 } catch (IOException ex) {
                     String message = "Could not read first image (the source): " + image1File.getAbsolutePath();
                     logger.debug(message, ex);
-                    errors.add(new ErrorMessage.Builder().message(message).build());
+                    context.addError(new ErrorMessage.Builder().message(message).build());
                 }
             }
         }
 
-        return bufferedImage1;
+        context.setBufferedImage1(bufferedImage1);
     }
 
-    private BufferedImage validateSecondImage(boolean image2Passed, CommandLine commandLine, final List<ErrorMessage> errors) {
+    private void validateSecondImage(boolean image2Passed, ValidationContext context) {
+        CommandLine commandLine = context.getCommandLine();
         BufferedImage bufferedImage2 = null;
 
         if (image2Passed) {
             File image2File = new File(commandLine.getOptionValue(defaults.getImage2OptionName()));
             if (!image2File.exists()) {
-                errors.add(new ErrorMessage.Builder().message("Second image (the template) doesn't exists. Please make sure you provide correct path").build());
+                context.addError(new ErrorMessage.Builder().message("Second image (the template) doesn't exists. Please make sure you provide correct path").build());
             } else {
                 try {
                     bufferedImage2 = ImageIO.read(image2File);
                 } catch (IOException ex) {
                     String message = "Could not read second image (the template): " + image2File.getAbsolutePath();
                     logger.debug(message, ex);
-                    errors.add(new ErrorMessage.Builder().message(message).build());
+                    context.addError(new ErrorMessage.Builder().message(message).build());
                 }
             }
         }
 
-        return bufferedImage2;
+        context.setBufferedImage2(bufferedImage2);
     }
 
     private boolean isHelpArgument(CommandLine commandLine) {

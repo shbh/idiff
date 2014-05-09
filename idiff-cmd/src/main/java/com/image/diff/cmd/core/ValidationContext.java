@@ -20,7 +20,7 @@ public class ValidationContext {
         this.errors.addAll(errors);
     }
 
-    public void addErrors(ErrorMessage error) {
+    public void addError(ErrorMessage error) {
         this.errors.add(error);
     }
 
