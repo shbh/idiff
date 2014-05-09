@@ -1,5 +1,6 @@
 package com.image.diff.cmd.core;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
@@ -42,9 +43,9 @@ public class CmdValidator {
 
         List<ErrorMessage> validateErrors = null;
         if (findModeUsed) {
-            validateErrors = validateFindMode();
+            validateErrors = validateFindMode(commandLine);
         } else if (diffModeUsed) {
-            validateErrors = validateDiffMode();
+            validateErrors = validateDiffMode(commandLine);
         }
 
         if (validateErrors != null && !validateErrors.isEmpty()) {
@@ -54,11 +55,42 @@ public class CmdValidator {
         return errors;
     }
 
-    private List<ErrorMessage> validateFindMode() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    private List<ErrorMessage> validateFindMode(CommandLine commandLine) {
+        final List<ErrorMessage> errors = new ArrayList<ErrorMessage>();
+
+        boolean image1Passed = commandLine.hasOption(defaults.getImage1OptionName());
+        if (!image1Passed) {
+            errors.add(new ErrorMessage.Builder().message("First image (the source) argument expected").build());
+        }
+
+        if (image1Passed) {
+            File image1File = new File(commandLine.getOptionValue(defaults.getImage1OptionName()));
+            if (!image1File.exists()) {
+                errors.add(new ErrorMessage.Builder().message("First image (the source) doesn't exists. Please make sure you provide correct path").build());
+            }
+        }
+
+        boolean image2Passed = commandLine.hasOption(defaults.getImage2OptionName());
+        if (!image2Passed) {
+            errors.add(new ErrorMessage.Builder().message("Second image (the template) argument expected").build());
+        }
+
+        if (image2Passed) {
+            File image2File = new File(commandLine.getOptionValue(defaults.getImage2OptionName()));
+            if (!image2File.exists()) {
+                errors.add(new ErrorMessage.Builder().message("Second image (the template) doesn't exists. Please make sure you provide correct path").build());
+            }
+        }
+
+        boolean resultImagePassed = commandLine.hasOption(defaults.getResultImageOptionName());
+        if (!resultImagePassed) {
+            errors.add(new ErrorMessage.Builder().message("Result image argument expected").build());
+        }
+
+        return errors;
     }
 
-    private List<ErrorMessage> validateDiffMode() {
+    private List<ErrorMessage> validateDiffMode(CommandLine commandLine) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
