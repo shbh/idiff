@@ -30,8 +30,36 @@ public class CmdValidator {
             return errors;
         }
 
-        throw new UnsupportedOperationException("Need implements of validation of all possible states");
-//        return errors;
+        boolean findModeUsed = commandLine.hasOption(defaults.getFindOptionName());
+        boolean diffModeUsed = commandLine.hasOption(defaults.getDiffOptionName());
+
+        boolean notOneOptionChosen = (!findModeUsed && !diffModeUsed) || (findModeUsed && diffModeUsed);
+
+        if (notOneOptionChosen) {
+            errors.add(new ErrorMessage.Builder().message("Find or Diff mode should be used").build());
+            return errors;
+        }
+
+        List<ErrorMessage> validateErrors = null;
+        if (findModeUsed) {
+            validateErrors = validateFindMode();
+        } else if (diffModeUsed) {
+            validateErrors = validateDiffMode();
+        }
+
+        if (validateErrors != null && !validateErrors.isEmpty()) {
+            errors.addAll(validateErrors);
+        }
+
+        return errors;
+    }
+
+    private List<ErrorMessage> validateFindMode() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    private List<ErrorMessage> validateDiffMode() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public static class Builder {

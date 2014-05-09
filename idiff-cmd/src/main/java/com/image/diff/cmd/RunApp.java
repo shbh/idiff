@@ -15,7 +15,7 @@ public class RunApp {
     public static void main(String[] args) throws Exception {
         final String runArg = "java -jar idiff-1.0.jar";
 
-//        args = new String[]{"--image1", "samples/sourceImage.jpg", "--image2", "samples/templateImage.jpg"};
+        args = new String[]{"--image1", "samples/sourceImage.jpg", "--image2", "samples/templateImage.jpg"};
         new RunApp().run(runArg, args);
     }
 
