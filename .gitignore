@@ -11,6 +11,7 @@
 .metadata
 bin/**
 tmp/**
+output/**
 tmp/**/*
 *.tmp
 *.bak
