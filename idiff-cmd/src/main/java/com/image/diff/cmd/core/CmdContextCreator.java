@@ -69,7 +69,7 @@ public class CmdContextCreator {
             List<ErrorMessage> errorMessages = cmdValidator.validate();
             if (!errorMessages.isEmpty()) {
                 String error = buildErrorMessage(errorMessages);
-                throw new RuntimeException(error);
+                throw new ValidationException(error);
             }
 
             CmdContextCreator creator = new CmdContextCreator();
