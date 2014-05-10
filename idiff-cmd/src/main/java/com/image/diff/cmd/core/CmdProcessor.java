@@ -123,7 +123,7 @@ public class CmdProcessor {
     }
 
     private String getResultSourceImageOption(CommandLine commandLine) {
-        String value = defaults.getResultImageValue().getAbsolutePath();
+        String value = defaults.getResultSourceImageValue().getAbsolutePath();
         final Object parsedOptionValue = commandLine.getOptionValue(defaults.getResultSourceImageOptionName());
         if (parsedOptionValue != null) {
             value = String.valueOf(parsedOptionValue);
