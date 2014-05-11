@@ -2,13 +2,10 @@ package com.image.diff.helper;
 
 import com.image.diff.core.Match;
 import com.image.diff.core.MatchContext;
-import com.image.diff.finder.DiffStrategy;
-import com.image.diff.finder.FindStrategy;
-import com.image.diff.finder.SearchStrategy;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
+import com.image.diff.search.DiffSearchStrategy;
+import com.image.diff.search.FindSearchStrategy;
+import com.image.diff.search.SearchStrategy;
 import java.util.List;
-import javax.imageio.ImageIO;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,28 +13,26 @@ import org.slf4j.LoggerFactory;
 public class Finder {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    private final MatchContext context;
+    private MatchContext context;
     private SearchStrategy searchStrategy;
 
-    private Finder(MatchContext context) {
-        this.context = context;
+    private Finder() {
     }
 
     public List<Match> find() {
         List<Match> matchResults = searchStrategy.find();
-        context.addMatches(matchResults);
 
-        searchStrategy.highlightRegions();
-        searchStrategy.highlightMatchedElements();
+        searchStrategy.highlightRois();
+        searchStrategy.highlightMatchedElements(matchResults);
 
         if (context.isShowResult()) {
-            searchStrategy.showResult();
+            searchStrategy.showResult(matchResults);
         }
 
         return matchResults;
     }
 
-    public static final class Builder {
+    public static class Builder {
 
         private final MatchContext context;
         private ImageHelper imageHelper;
@@ -45,6 +40,7 @@ public class Finder {
         private SearchStrategy searchStrategy;
 
         public Builder(MatchContext context) {
+            Validate.notNull(context, "Context must not be null");
             this.context = context;
         }
 
@@ -79,17 +75,17 @@ public class Finder {
             Validate.isTrue(context.getImage1().exists(), "First image should exists.");
             Validate.isTrue(context.getImage2().exists(), "Second image should exists.");
 
-            // init images in context
-            initImages();
+            boolean oneOptionChosen = !((!context.isFindSpecified() && !context.isDiffSpecified()) || (context.isFindSpecified() && context.isDiffSpecified()));
+            Validate.isTrue(oneOptionChosen, "You should choose mode before start: diff or find.");
 
             if (searchStrategy == null) {
                 // initialize it based on context values
                 if (context.isDiffSpecified()) {
-                    searchStrategy = new DiffStrategy.Builder(context).
+                    searchStrategy = new DiffSearchStrategy.Builder(context).
                         highlightHelper(highlightHelper).
                         imageHelper(imageHelper).build();
                 } else if (context.isFindSpecified()) {
-                    searchStrategy = new FindStrategy.Builder(context).
+                    searchStrategy = new FindSearchStrategy.Builder(context).
                         highlightHelper(highlightHelper).
                         imageHelper(imageHelper).build();
                 } else {
@@ -97,28 +93,11 @@ public class Finder {
                 }
             }
 
-            Finder finder = new Finder(context);
+            Finder finder = new Finder();
+            finder.context = context;
             finder.searchStrategy = searchStrategy;
 
             return finder;
-        }
-
-        private void initImages() {
-            BufferedImage bufferedImage1;
-            try {
-                bufferedImage1 = ImageIO.read(context.getImage1());
-            } catch (IOException ex) {
-                throw new IllegalStateException("Could not initialize first image: " + context.getImage1().getAbsolutePath(), ex);
-            }
-            context.setBufferedImage1(bufferedImage1);
-
-            BufferedImage bufferedImage2;
-            try {
-                bufferedImage2 = ImageIO.read(context.getImage2());
-            } catch (IOException ex) {
-                throw new IllegalStateException("Could not initialize second image: " + context.getImage2().getAbsolutePath(), ex);
-            }
-            context.setBufferedImage2(bufferedImage2);
         }
     }
 }

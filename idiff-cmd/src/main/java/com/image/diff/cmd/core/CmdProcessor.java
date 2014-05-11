@@ -17,12 +17,11 @@ public class CmdProcessor {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final String[] cmdArgs;
+    private String[] cmdArgs;
     private CmdCreator cmdCreator;
     private Defaults defaults;
 
-    private CmdProcessor(String[] cmdArgs) {
-        this.cmdArgs = cmdArgs;
+    private CmdProcessor() {
     }
 
     MatchContext createContext(String runArg) {
@@ -247,21 +246,20 @@ public class CmdProcessor {
         TemplateMatchMethod matchMethodOption = getMatchMethodOption(commandLine);
         boolean showResultOptionSpecified = isShowResultOptionSpecified(commandLine);
 
-        MatchContext matchContext = new MatchContext();
-        matchContext.setImage1(new File(image1Option));
-        matchContext.setImage2(new File(image2Option));
-        matchContext.setLimit(limitOption);
-        matchContext.setMatchSimilarity(matchSimilarityOption);
-        matchContext.setDiffSpecified(diffSpecified);
-        matchContext.setFindSpecified(findSpecified);
-        matchContext.setResultImage(new File(resultImageOption));
-        matchContext.setResultSourceImage(new File(resultSourceImageOption));
-        if (!roisOption.isEmpty()) {
-            matchContext.addRois(roisOption);
-        }
-        matchContext.setTitle(titleOption);
-        matchContext.setMatchMethod(matchMethodOption);
-        matchContext.setShowResult(showResultOptionSpecified);
+        MatchContext matchContext = new MatchContext.Builder().
+            image1(new File(image1Option)).
+            image2(new File(image2Option)).
+            limit(limitOption).
+            matchSimilarity(matchSimilarityOption).
+            diff(diffSpecified).
+            find(findSpecified).
+            resultImage(new File(resultImageOption)).
+            resultSourceImage(new File(resultSourceImageOption)).
+            rois(roisOption).
+            title(titleOption).
+            matchMethod(matchMethodOption).
+            showResult(showResultOptionSpecified).
+            build();
 
         return matchContext;
     }
@@ -295,7 +293,7 @@ public class CmdProcessor {
         }
 
         public CmdProcessor build() {
-            CmdProcessor processor = new CmdProcessor(cmdArgs);
+            CmdProcessor processor = new CmdProcessor();
 
             if (defaults == null) {
                 logger.debug("Default instance will be used for defaults values");
@@ -305,6 +303,7 @@ public class CmdProcessor {
                 logger.debug("Default instance will be used for cmd creator");
                 cmdCreator = new CmdCreator.Builder().defaults(defaults).build();
             }
+            processor.cmdArgs = cmdArgs;
             processor.defaults = defaults;
             processor.cmdCreator = cmdCreator;
 

@@ -1,4 +1,4 @@
-package com.image.diff.finder;
+package com.image.diff.search;
 
 import com.image.diff.core.Match;
 import com.image.diff.core.MatchContainer;
@@ -26,28 +26,18 @@ import java.util.Collections;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FindStrategy implements SearchStrategy {
+public class FindSearchStrategy implements SearchStrategy {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    private final MatchContext context;
+    private MatchContext context;
     private ImageHelper imageHelper;
     private HighlightHelper highlightHelper;
 
-    private FindStrategy(MatchContext context) {
-        this.context = context;
-        postInit();
-    }
-
-    private void postInit() {
-        // copy content from images to result images to show it in final UI frame, if needed
-        try {
-            FileUtils.copyFile(context.getImage1(), context.getResultImage());
-        } catch (IOException ex) {
-            throw new IllegalStateException("Could not initialize result image file: " + context.getResultImage().getAbsolutePath(), ex);
-        }
+    private FindSearchStrategy() {
     }
 
     @Override
@@ -97,7 +87,8 @@ public class FindStrategy implements SearchStrategy {
         cvReleaseImage(container.getSourceImage());
         cvReleaseImage(container.getTemplateImage());
         cvReleaseImage(container.getResultImage());
-        return matchResults;
+
+        return Collections.unmodifiableList(matchResults);
     }
 
     private MatchResult fetchNextBestMatch(final MatchContainer resultContainer) {
@@ -148,18 +139,18 @@ public class FindStrategy implements SearchStrategy {
     }
 
     @Override
-    public void showResult() {
+    public void showResult(final List<Match> matchResults) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                FindResultWindow resultWindow = new FindResultWindow(context);
+                FindResultWindow resultWindow = new FindResultWindow(context, matchResults);
                 resultWindow.show();
             }
         });
     }
 
     @Override
-    public void highlightRegions() {
+    public void highlightRois() {
         for (Roi r : context.getRois()) {
             try {
                 highlightElementOnResultImage(new HighlightElement.Builder().
@@ -176,8 +167,13 @@ public class FindStrategy implements SearchStrategy {
     }
 
     @Override
-    public void highlightMatchedElements() {
-        for (Match match : context.getMatches()) {
+    public void highlightMatchedElements(List<Match> matchResults) {
+        if (matchResults == null || matchResults.isEmpty()) {
+            logger.warn("No matchings to highlight");
+            return;
+        }
+
+        for (Match match : matchResults) {
             int x = match.getX();
             int y = match.getY();
             int width = match.getWidth();
@@ -213,6 +209,7 @@ public class FindStrategy implements SearchStrategy {
         private HighlightHelper highlightHelper;
 
         public Builder(MatchContext context) {
+            Validate.notNull(context, "Context must not be null");
             this.context = context;
         }
 
@@ -226,8 +223,11 @@ public class FindStrategy implements SearchStrategy {
             return this;
         }
 
-        public FindStrategy build() {
-            FindStrategy instance = new FindStrategy(context);
+        public FindSearchStrategy build() {
+            // post init
+            postInitContext();
+
+            FindSearchStrategy instance = new FindSearchStrategy();
 
             if (imageHelper == null) {
                 logger.debug("Default instance will be used as image helper");
@@ -237,10 +237,20 @@ public class FindStrategy implements SearchStrategy {
                 logger.debug("Default instance will be used as highlight helper");
                 highlightHelper = new HighlightHelper();
             }
+            instance.context = context;
             instance.imageHelper = imageHelper;
             instance.highlightHelper = highlightHelper;
 
             return instance;
+        }
+
+        private void postInitContext() {
+            // copy content from images to result images to show it in final UI frame, if needed
+            try {
+                FileUtils.copyFile(context.getImage1(), context.getResultImage());
+            } catch (IOException ex) {
+                throw new IllegalStateException("Could not initialize result image file: " + context.getResultImage().getAbsolutePath(), ex);
+            }
         }
     }
 }

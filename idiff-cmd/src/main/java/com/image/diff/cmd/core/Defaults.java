@@ -37,83 +37,84 @@ public class Defaults {
     private static final int LIMIT_VALUE = 100;
 
     public MatchContext getFindDiffRoiSampleContext() {
-        MatchContext matchContext = new MatchContext();
 
         String image1FilePath = "samples/image1.png";
         String image2FilePath = "samples/image2.png";
 
-        matchContext.setDiffSpecified(true);
-        matchContext.setTitle("[CV_TM_CCOEFF_NORMED] Find differences between images images with equal sizes and ROIs");
-        matchContext.setMatchSimilarity(0.95D);
-        matchContext.setShowResult(true);
-        matchContext.setImage1(new File(image1FilePath));
-        matchContext.setImage2(new File(image2FilePath));
-        matchContext.setResultImage(Defaults.RESULT_IMAGE_VALUE);
-        matchContext.setResultSourceImage(Defaults.RESULT_SOURCE_IMAGE_VALUE);
-        matchContext.setMatchMethod(TemplateMatchMethod.CV_TM_CCOEFF_NORMED);
-        matchContext.setLimit(100);
-        matchContext.addRoi(new Roi(247, 137, 325, 35));
+        MatchContext matchContext = new MatchContext.Builder().
+            diff().
+            title("[CV_TM_CCOEFF_NORMED] Find differences between images images with equal sizes and ROIs").
+            matchSimilarity(0.95D).
+            showResult().
+            image1(new File(image1FilePath)).
+            image2(new File(image2FilePath)).
+            resultImage(Defaults.RESULT_IMAGE_VALUE).
+            resultSourceImage(Defaults.RESULT_SOURCE_IMAGE_VALUE).
+            matchMethod(TemplateMatchMethod.CV_TM_CCOEFF_NORMED).
+            limit(100).
+            roi(new Roi(247, 137, 325, 35)).
+            build();
 
         return matchContext;
     }
 
     public MatchContext getFindDiffSampleContext() {
-        MatchContext matchContext = new MatchContext();
-
         String image1FilePath = "samples/image1.png";
         String image2FilePath = "samples/image2.png";
 
-        matchContext.setDiffSpecified(true);
-        matchContext.setTitle("[CV_TM_CCOEFF_NORMED] Find differences between images with equal sizes");
-        matchContext.setMatchSimilarity(0.95D);
-        matchContext.setShowResult(true);
-        matchContext.setImage1(new File(image1FilePath));
-        matchContext.setImage2(new File(image2FilePath));
-        matchContext.setResultImage(Defaults.RESULT_IMAGE_VALUE);
-        matchContext.setResultSourceImage(Defaults.RESULT_SOURCE_IMAGE_VALUE);
-        matchContext.setMatchMethod(TemplateMatchMethod.CV_TM_CCOEFF_NORMED);
-        matchContext.setLimit(100);
+        MatchContext matchContext = new MatchContext.Builder().
+            diff().
+            title("[CV_TM_CCOEFF_NORMED] Find differences between images with equal sizes").
+            matchSimilarity(0.95D).
+            showResult().
+            image1(new File(image1FilePath)).
+            image2(new File(image2FilePath)).
+            resultImage(Defaults.RESULT_IMAGE_VALUE).
+            resultSourceImage(Defaults.RESULT_SOURCE_IMAGE_VALUE).
+            matchMethod(TemplateMatchMethod.CV_TM_CCOEFF_NORMED).
+            limit(100).
+            build();
 
         return matchContext;
     }
 
     public MatchContext getFindTemplateInSourceImageRoiSampleContext() {
-        MatchContext matchContext = new MatchContext();
-
         String sourceImageFilePath = "samples/sourceImage.jpg";
         String templateImageFilePath = "samples/templateImage.jpg";
 
-        matchContext.setFindSpecified(true);
-        matchContext.setTitle("[CV_TM_CCOEFF_NORMED] Find template in source image inside of the ROIs");
-        matchContext.setMatchSimilarity(0.95D);
-        matchContext.setShowResult(true);
-        matchContext.setImage1(new File(sourceImageFilePath));
-        matchContext.setImage2(new File(templateImageFilePath));
-        matchContext.setResultImage(Defaults.RESULT_IMAGE_VALUE);
-        matchContext.setResultSourceImage(Defaults.RESULT_SOURCE_IMAGE_VALUE);
-        matchContext.setMatchMethod(TemplateMatchMethod.CV_TM_CCOEFF_NORMED);
-        matchContext.setLimit(100);
-        matchContext.addRoi(new Roi(230, 140, 185, 155));
+        MatchContext matchContext = new MatchContext.Builder().
+            find().
+            title("[CV_TM_CCOEFF_NORMED] Find template in source image inside of the ROIs").
+            matchSimilarity(0.95D).
+            showResult().
+            image1(new File(sourceImageFilePath)).
+            image2(new File(templateImageFilePath)).
+            resultImage(Defaults.RESULT_IMAGE_VALUE).
+            resultSourceImage(Defaults.RESULT_SOURCE_IMAGE_VALUE).
+            matchMethod(TemplateMatchMethod.CV_TM_CCOEFF_NORMED).
+            limit(100).
+            roi(new Roi(230, 140, 185, 155)).
+            build();
 
         return matchContext;
     }
 
     public MatchContext getFindTemplateInSourceImageSampleContext() {
-        MatchContext matchContext = new MatchContext();
-
         String sourceImageFilePath = "samples/sourceImage.jpg";
         String templateImageFilePath = "samples/templateImage.jpg";
 
-        matchContext.setFindSpecified(true);
-        matchContext.setTitle("[CV_TM_CCOEFF_NORMED] Find template in source image");
-        matchContext.setMatchSimilarity(0.95D);
-        matchContext.setShowResult(true);
-        matchContext.setImage1(new File(sourceImageFilePath));
-        matchContext.setImage2(new File(templateImageFilePath));
-        matchContext.setResultImage(Defaults.RESULT_IMAGE_VALUE);
-        matchContext.setResultSourceImage(Defaults.RESULT_SOURCE_IMAGE_VALUE);
-        matchContext.setMatchMethod(TemplateMatchMethod.CV_TM_CCOEFF_NORMED);
-        matchContext.setLimit(100);
+        MatchContext matchContext = new MatchContext.Builder().
+            find().
+            title("[CV_TM_CCOEFF_NORMED] Find template in source image").
+            matchSimilarity(0.95D).
+            showResult().
+            image1(new File(sourceImageFilePath)).
+            image2(new File(templateImageFilePath)).
+            resultImage(Defaults.RESULT_IMAGE_VALUE).
+            resultSourceImage(Defaults.RESULT_SOURCE_IMAGE_VALUE).
+            matchMethod(TemplateMatchMethod.CV_TM_CCOEFF_NORMED).
+            limit(100).
+            build();
 
         return matchContext;
     }

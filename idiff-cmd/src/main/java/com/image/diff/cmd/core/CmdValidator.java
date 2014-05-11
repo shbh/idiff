@@ -16,12 +16,11 @@ public class CmdValidator {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final String[] cmdArgs;
+    private String[] cmdArgs;
     private CmdCreator cmdCreator;
     private Defaults defaults;
 
-    private CmdValidator(String[] cmdArgs) {
-        this.cmdArgs = cmdArgs;
+    private CmdValidator() {
     }
 
     List<ErrorMessage> validate() {
@@ -246,7 +245,7 @@ public class CmdValidator {
         }
 
         public CmdValidator build() {
-            CmdValidator validator = new CmdValidator(cmdArgs);
+            CmdValidator validator = new CmdValidator();
 
             if (defaults == null) {
                 logger.debug("Default instance will be used for defaults values");
@@ -256,6 +255,7 @@ public class CmdValidator {
                 logger.debug("Default instance will be used for cmd creator");
                 cmdCreator = new CmdCreator.Builder().defaults(defaults).build();
             }
+            validator.cmdArgs = cmdArgs;
             validator.defaults = defaults;
             validator.cmdCreator = cmdCreator;
 

@@ -25,6 +25,6 @@ public class RunApp {
         MatchContext matchContext = creator.create();
         Finder finder = new Finder.Builder(matchContext).build();
         List<Match> matches = finder.find();
-        logger.info("Found: {}", matches);
+        logger.info("Found matches regions: {}", matches);
     }
 }

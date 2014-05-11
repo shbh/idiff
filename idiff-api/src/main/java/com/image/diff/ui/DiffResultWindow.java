@@ -7,12 +7,14 @@ import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.ToolTipManager;
 import javax.swing.WindowConstants;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +40,13 @@ public class DiffResultWindow {
         }
     }
 
-    public DiffResultWindow(final MatchContext context) {
+    public DiffResultWindow(MatchContext context, List<Match> matchResults) {
+        Validate.notNull(context, "Context must not be null");
         this.context = context;
-        init();
+        postInit(matchResults);
     }
 
-    private void init() {
+    private void postInit(final List<Match> matchResults) {
         URL resultImageURL;
         try {
             resultImageURL = context.getResultImage().toURI().toURL();
@@ -75,7 +78,7 @@ public class DiffResultWindow {
             @Override
             public void mouseMoved(MouseEvent e) {
                 boolean foundToolTipArea = false;
-                for (Match m : context.getMatches()) {
+                for (Match m : matchResults) {
                     if (m.contains(e.getX(), e.getY())) {
                         imageLabel.setToolTipText("" + m);
                         imageLabel.revalidate();

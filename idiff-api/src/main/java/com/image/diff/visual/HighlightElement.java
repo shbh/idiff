@@ -60,7 +60,7 @@ public class HighlightElement {
         return "x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + ", borderColor=" + borderColor + ", areaColor=" + areaColor + ", fontColor=" + fontColor + ", font=" + font + ", text=" + text;
     }
 
-    public static final class Builder {
+    public static class Builder {
 
         private int x;
         private int y;

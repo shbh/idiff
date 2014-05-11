@@ -1,4 +1,4 @@
-package com.image.diff.finder;
+package com.image.diff.search;
 
 import com.image.diff.core.Match;
 import com.image.diff.core.MatchContext;
@@ -13,32 +13,22 @@ import com.image.diff.visual.HighlightElement;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DiffStrategy implements SearchStrategy {
+public class DiffSearchStrategy implements SearchStrategy {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    private final MatchContext context;
+    private MatchContext context;
     private ImageHelper imageHelper;
     private HighlightHelper highlightHelper;
 
-    private DiffStrategy(MatchContext context) {
-        this.context = context;
-        postInit();
-    }
-
-    private void postInit() {
-        // copy content from images to result images to show it in final UI frame, if needed
-        try {
-            FileUtils.copyFile(context.getImage2(), context.getResultImage());
-            FileUtils.copyFile(context.getImage1(), context.getResultSourceImage());
-        } catch (IOException ex) {
-            throw new IllegalStateException("Could not initialize result image file: " + context.getResultImage().getAbsolutePath(), ex);
-        }
+    private DiffSearchStrategy() {
     }
 
     @Override
@@ -92,7 +82,8 @@ public class DiffStrategy implements SearchStrategy {
         cvReleaseImage(firstImage);
         cvReleaseImage(secondImage);
         cvReleaseImage(diffImage);
-        return matchResults;
+
+        return Collections.unmodifiableList(matchResults);
     }
 
     private boolean intersect(Roi roi, List<Roi> rois) {
@@ -114,18 +105,18 @@ public class DiffStrategy implements SearchStrategy {
     }
 
     @Override
-    public void showResult() {
+    public void showResult(final List<Match> matchResults) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                DiffResultWindow resultWindow = new DiffResultWindow(context);
+                DiffResultWindow resultWindow = new DiffResultWindow(context, matchResults);
                 resultWindow.show();
             }
         });
     }
 
     @Override
-    public void highlightRegions() {
+    public void highlightRois() {
         for (Roi r : context.getRois()) {
             try {
                 highlightElementOnSourceImage(new HighlightElement.Builder().
@@ -151,8 +142,13 @@ public class DiffStrategy implements SearchStrategy {
     }
 
     @Override
-    public void highlightMatchedElements() {
-        for (Match match : context.getMatches()) {
+    public void highlightMatchedElements(List<Match> matchResults) {
+        if (matchResults == null || matchResults.isEmpty()) {
+            logger.warn("No matchings to highlight");
+            return;
+        }
+
+        for (Match match : matchResults) {
             int x = match.getX();
             int y = match.getY();
             int width = match.getWidth();
@@ -202,6 +198,7 @@ public class DiffStrategy implements SearchStrategy {
         private HighlightHelper highlightHelper;
 
         public Builder(MatchContext context) {
+            Validate.notNull(context, "Context must not be null");
             this.context = context;
         }
 
@@ -215,8 +212,11 @@ public class DiffStrategy implements SearchStrategy {
             return this;
         }
 
-        public DiffStrategy build() {
-            DiffStrategy instance = new DiffStrategy(context);
+        public DiffSearchStrategy build() {
+            // post init
+            postInitContext();
+
+            DiffSearchStrategy instance = new DiffSearchStrategy();
 
             if (imageHelper == null) {
                 logger.debug("Default instance will be used as image helper");
@@ -226,10 +226,21 @@ public class DiffStrategy implements SearchStrategy {
                 logger.debug("Default instance will be used as highlight helper");
                 highlightHelper = new HighlightHelper();
             }
+            instance.context = context;
             instance.imageHelper = imageHelper;
             instance.highlightHelper = highlightHelper;
 
             return instance;
+        }
+
+        private void postInitContext() {
+            // copy content from images to result images to show it in final UI frame, if needed
+            try {
+                FileUtils.copyFile(context.getImage2(), context.getResultImage());
+                FileUtils.copyFile(context.getImage1(), context.getResultSourceImage());
+            } catch (IOException ex) {
+                throw new IllegalStateException("Could not initialize result image file: " + context.getResultImage().getAbsolutePath(), ex);
+            }
         }
     }
 }
