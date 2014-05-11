@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
-public class FinderTest {
+public class FinderMockTest {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     private static ImagesContainer imagesContainer;
